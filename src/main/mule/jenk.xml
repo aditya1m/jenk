@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a880d866-8c38-4df9-ad3a-a6af8b3364ff" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
@@ -14,17 +15,19 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 	</http:request-config>
 	<os:object-store name="Object_store" doc:name="Object store" doc:id="d82b0f40-d1f3-4ab9-acab-4c783a6b5a41" />
 	<ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy" doc:id="0d60caef-2e73-4e9b-b1d2-3baf12b17e89" >
-		<os:private-object-store expirationInterval="30" expirationIntervalUnit="SECONDS" />
+		<os:private-object-store expirationInterval="30" expirationIntervalUnit="SECONDS" entryTtl="20"/>
 	</ee:object-store-caching-strategy>
 	<flow name="jenkFlow" doc:id="fe254c38-8a8f-4509-b353-1f178bd6eb2f" >
-		<http:listener doc:name="Listener" doc:id="87725379-2033-4ecd-a6fe-31821aa1515f" config-ref="HTTP_Listener_config" path="/hello"/>
+		<http:listener doc:name="Listener" doc:id="87725379-2033-4ecd-a6fe-31821aa1515f" config-ref="HTTP_Listener_config" path="/hello">
+		</http:listener>
 		<logger level="INFO" doc:name="Logger" doc:id="429a7c99-8616-4631-872f-6c8a6fcff529" message="#['Message received at ' ++ (now() as String)]"/>
 		<set-payload value="#['Hello at ' ++ (now() as String)]" doc:name="Set Payload" doc:id="0e8d6c65-042a-4a1c-a824-1f9c805f46ef" />
+		<set-variable value="#[500]" doc:name="Set Variable" doc:id="694613dd-c1e6-4671-81f5-8f17e6dada4f" variableName="status"/>
 	</flow>
 	<flow name="jenkFlow1" doc:id="146baca1-97eb-436a-80a1-6b3c77eebff0" >
 		<scheduler doc:name="Scheduler" doc:id="c91ab3fe-e2cc-4c20-aa57-feac745bf261" >
 			<scheduling-strategy >
-				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+				<fixed-frequency frequency="500" timeUnit="DAYS" startDelay="100"/>
 			</scheduling-strategy>
 		</scheduler>
 		<logger level="INFO" doc:name="Logger" doc:id="7bd5dc19-ec98-4995-ac58-a58353269802" message="Scheduler started"/>
